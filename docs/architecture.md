@@ -7,6 +7,7 @@
 Responsabilidades:
 
 - Recibir comandos del mando.
+- Servir una web de control por WiFi.
 - Leer sensor de distancia.
 - Calcular velocidad final con logica adaptativa.
 - Generar PWM para motores mediante MCPWM.
@@ -16,7 +17,7 @@ Tareas previstas:
 
 | Tarea | Entrada | Salida |
 | --- | --- | --- |
-| `communication_task` | WiFi | `sem_control_command_t` |
+| `http_server` | HTTP `/api/control` | `sem_control_command_t` |
 | `sensor_task` | sensor distancia | distancia en cm |
 | `control_task` | comando + distancia | velocidad limitada |
 | `motor_task` | velocidad limitada | MCPWM |
@@ -48,6 +49,6 @@ La idea es que cualquier cambio en el formato de mensajes se haga una sola vez e
 
 ## Recomendacion de comunicacion
 
-Para empezar, UDP es la opcion mas simple: baja latencia, poco codigo y suficiente para comandos periodicos de joystick. El vehiculo deberia parar si no recibe comandos durante un timeout corto, por ejemplo 300-500 ms.
+Para el control desde ordenador, el vehiculo arranca como punto de acceso WiFi y sirve una web local. La web envia comandos periodicos por HTTP mientras hay teclas pulsadas. El vehiculo para si no recibe comandos durante un timeout corto, actualmente 500 ms.
 
-El panel web puede convivir en el ESP32-S3 del vehiculo, pero no deberia ser el canal principal del joystick.
+Si se vuelve al mando fisico con joystick, UDP o ESP-NOW siguen siendo mejores candidatos que HTTP para baja latencia.

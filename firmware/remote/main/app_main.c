@@ -38,7 +38,6 @@ static void communication_task(void *arg)
 
     while (true) {
         if (xQueueReceive(s_command_queue, &command, pdMS_TO_TICKS(200)) == pdTRUE) {
-            /* TODO: replace with WiFi send path. */
             ESP_LOGI(TAG, "send throttle=%d steering=%d seq=%lu",
                      command.throttle,
                      command.steering,

@@ -1,3 +1,9 @@
 build/
+build*/
+**/build/
+**/build*/
 sdkconfig
+sdkconfig*
 managed_components/
+.DS_Store
+**/.DS_Store
