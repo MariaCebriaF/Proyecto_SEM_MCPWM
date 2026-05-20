@@ -16,9 +16,9 @@ Revisa esta tabla antes de conectar motores. La foto del cableado no deja leer t
 | TB6612 VCC | 3V3 | Alimentacion logica |
 | TB6612 VM | Bateria motores | Alimentacion potencia motores |
 | TB6612 GND | GND comun | Unir GND de bateria, TB6612 y ESP32-S3 |
-| Servo direccion | TBD | PWM/LEDC o MCPWM; no implementado todavia |
-| Ultrasonidos TRIG | TBD | HC-SR04 o equivalente |
-| Ultrasonidos ECHO | TBD | comprobar nivel 3.3 V |
+| Ultrasonidos TRIG | GPIO13 | HC-SR04 o equivalente |
+| Ultrasonidos ECHO | GPIO12 | comprobar nivel 3.3 V |
+| Servo direccion| GPIO18 | comprobar nivel 3.3 V |
 
 ## ESP32-S3 Remote
 
