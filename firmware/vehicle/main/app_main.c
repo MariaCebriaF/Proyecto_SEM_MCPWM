@@ -1,3 +1,5 @@
+#include "wifi.h"
+#include "control.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -19,6 +21,9 @@
 #include "sem_protocol.h"
 
 static const char *TAG = "sem_vehicle";
+volatile uint8_t g_modo = 0; // 0 = manual, 1 = autónomo
+
+
 
 #define SEM_WIFI_SSID "SEM-PICAR"
 #define SEM_WIFI_CHANNEL 1
@@ -197,45 +202,28 @@ static esp_err_t tb6612_drive(tb6612_driver_t *driver, int16_t throttle, int16_t
 }
 
 
+// --------------------------- TAREAS --------------------------
+
+
 static void control_task(void *arg)
 {
-    (void)arg;
-    sem_control_command_t command = sem_protocol_default_command();
-    sem_vehicle_telemetry_t telemetry = sem_protocol_default_telemetry();
-    int64_t last_command_us = 0;
+    TickType_t xUltimoTick = xTaskGetTickCount();
 
-    while (true) {
-        if (xQueueReceive(s_command_queue, &command, 0) == pdTRUE) {
-            last_command_us = esp_timer_get_time();
+    for (;;) {
+        // Leer el modo actual
+        uint8_t modo_actual;
+        taskENTER_CRITICAL(&spinlock_modo);
+            modo_actual = g_modo;
+        taskEXIT_CRITICAL(&spinlock_modo);
+
+        // Decidir qué función ejecutar
+        if (modo_actual == 0) {
+            control_manual();
+        } else {
+            control_autonomo();
         }
 
-        const uint16_t distance_cm = read_distance_cm_stub();
-        const bool link_ok = last_command_us > 0 &&
-                             (esp_timer_get_time() - last_command_us) <
-                                 (SEM_COMMAND_TIMEOUT_MS * 1000);
-        int16_t throttle = (command.enable && link_ok) ? command.throttle : 0;
-        int16_t steering = (command.enable && link_ok) ? command.steering : 0;
-
-        throttle = sem_protocol_limit_throttle_by_distance(throttle, distance_cm);
-        if (!link_ok) {
-            steering = 0;
-        }
-
-        sem_vehicle_state_t state = sem_protocol_state_from_distance(distance_cm, link_ok);
-        if (state == SEM_VEHICLE_STATE_RUNNING && throttle == 0 && steering == 0) {
-            state = SEM_VEHICLE_STATE_STOPPED;
-        }
-
-        telemetry.applied_throttle = throttle;
-        telemetry.applied_steering = steering;
-        telemetry.distance_cm = distance_cm;
-        telemetry.state = state;
-        telemetry.last_command_sequence = command.sequence;
-
-        xQueueOverwrite(s_motor_queue, &telemetry);
-        xQueueOverwrite(s_telemetry_queue, &telemetry);
-
-        vTaskDelay(pdMS_TO_TICKS(SEM_CONTROL_PERIOD_MS));
+        vTaskDelayUntil(&xUltimoTick, pdMS_TO_TICKS(50));
     }
 }
 
