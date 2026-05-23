@@ -21,7 +21,13 @@
 #include "sem_protocol.h"
 
 static const char *TAG = "sem_vehicle";
+
+// --------------------- VARIABLES GLOBALES ---------------------
 volatile uint8_t g_modo = 0; // 0 = manual, 1 = autónomo
+portMUSX_TYPE spinlock_modo = portMUX_INITIALIZER_UNLOCKED;
+
+volatile uint16_t g_distancia_cm = 100; //Valor seguro por defecto
+portMUX_TYPE spinlock_ultrasonidos = portMUX_INITIALIZER_UNLOCKED;
 
 
 
@@ -256,6 +262,9 @@ static void telemetry_task(void *arg)
     }
 }
 
+// --------------------------- FIN TAREAS --------------------------
+
+
 void app_main(void)
 {
     s_command_queue = xQueueCreate(1, sizeof(sem_control_command_t));
@@ -267,6 +276,8 @@ void app_main(void)
     //ESP_ERROR_CHECK(start_web_server());
 
     ESP_ERROR_CHECK(wifi_service_init(s_command_queue));
+
+    control_init(s_command_queue, s_telemetry_queue);
 
     xTaskCreate(control_task, "control", 4096, NULL, 6, NULL);
     xTaskCreate(motor_task, "motor", 4096, NULL, 5, NULL);

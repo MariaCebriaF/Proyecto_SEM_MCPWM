@@ -7,6 +7,10 @@
 #include "esp_http_server.h" 
 #include "sem_protocol.h"
 
+//Variables Globales Externas (Definidas en app_main.c) 
+extern volatile uint8_t g_modo;
+extern portMUX_TYPE spinlock_modo;
+
 static const char *TAG = "SEM_WIFI"; 
 
 // ----------- CREDENCIALES DE RED -----------
@@ -46,23 +50,37 @@ static esp_err_t websocket_handler(httpd_req_t *req)
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 
-    // Leemos primero para saber cuánto ocupa el mensaje
+    // Leemos primero para saber cuánto ocupa el mensaje (esto actualiza ws_pkt.len)
     esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 0);
     if (ret != ESP_OK) {
         return ret;
     }
-
-    // Si tiene datos, reservamos memoria y leemos el contenido real
+    
+    // Si tiene datos, reservamos memoria en la RAM y LEEMOS el contenido real
     if (ws_pkt.len > 0) {
+        // Reservamos memoria para el mensaje + 1 byte para el carácter de fin de cadena '\0'
         buf = calloc(1, ws_pkt.len + 1);
-        if (buf == NULL) return ESP_ERR_NO_MEM;
+        if (buf == NULL) {
+            return ESP_ERR_NO_MEM; // Si no hay RAM, salimos por seguridad
+        }
         
-        ws_pkt.payload = buf;
+        ws_pkt.payload = buf; // Le decimos dónde guardar el texto
+        
+        // Ahora SÍ leemos el mensaje real de la red
         ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
         
         if (ret == ESP_OK) {
             char *body = (char *)ws_pkt.payload;
             
+            /* 1. Extraer el modo solicitado por la web (0 = Manual, 1 = Autónomo) */
+            uint8_t modo_solicitado = (uint8_t)form_get_i32(body, "modo", 0);
+
+            /* 2. Actualizar la variable global de forma segura */
+            taskENTER_CRITICAL(&spinlock_modo);
+            g_modo = modo_solicitado;
+            taskEXIT_CRITICAL(&spinlock_modo);
+            
+            /* 3. Extraer y empaquetar los comandos de movimiento */
             sem_control_command_t command = {
                 .version = SEM_PROTOCOL_VERSION,
                 .throttle = sem_protocol_clamp_axis(form_get_i32(body, "throttle", 0)),
@@ -71,11 +89,14 @@ static esp_err_t websocket_handler(httpd_req_t *req)
                 .sequence = (uint32_t)form_get_i32(body, "sequence", 0),
             };
             
-            // Mandamos el comando a la Control Task sin bloquear
+            /* 4. Mandamos el comando a la Control Task sin bloquear */
             xQueueOverwrite(s_wifi_command_queue, &command);
         }
-        free(buf);
+        
+        // Es obligatorio liberar la memoria reservada para que no haya memory leaks
+        free(buf); 
     }
+    
     return ret;
 }
 
