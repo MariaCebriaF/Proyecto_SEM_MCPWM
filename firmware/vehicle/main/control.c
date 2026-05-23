@@ -3,16 +3,15 @@
 #include "esp_log.h"
 #include "sem_protocol.h"
 
-static const char *TAG = "CONTROL_MOD";
+//static const char *TAG = "CONTROL_MOD";
 
 /* ── Punteros locales a las colas ── */
 static QueueHandle_t q_cmd_in = NULL;
 static QueueHandle_t q_mot_out = NULL;
 
 /* ── Variables Globales Externas ── */
-portMUX_TYPE spinlock_ultrasonidos = portMUX_INITIALIZER_UNLOCKED;
+extern portMUX_TYPE spinlock_ultrasonidos;
 extern volatile uint16_t g_distancia_cm;
-
 /* ── Umbrales ── */
 #define DIST_PELIGRO_CM     20u
 #define DIST_PRECAUCION_CM  40u

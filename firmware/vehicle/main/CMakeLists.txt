@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "app_main.c"
+    SRCS "app_main.c" "wifi.c" "control.c"
     INCLUDE_DIRS "."
     REQUIRES sem_protocol driver esp_wifi esp_event esp_netif esp_http_server nvs_flash esp_timer
 )

@@ -16,7 +16,7 @@
 #include "esp_timer.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
-#include "esp_http_server.h"
+//#include "esp_http_server.h"
 
 #include "sem_protocol.h"
 
@@ -24,7 +24,7 @@ static const char *TAG = "sem_vehicle";
 
 // --------------------- VARIABLES GLOBALES ---------------------
 volatile uint8_t g_modo = 0; // 0 = manual, 1 = autónomo
-portMUSX_TYPE spinlock_modo = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE spinlock_modo = portMUX_INITIALIZER_UNLOCKED;
 
 volatile uint16_t g_distancia_cm = 100; //Valor seguro por defecto
 portMUX_TYPE spinlock_ultrasonidos = portMUX_INITIALIZER_UNLOCKED;
@@ -87,10 +87,12 @@ static tb6612_driver_t s_motor_driver = {
     },
 };
 
+/*
 static uint16_t read_distance_cm_stub(void)
 {
     return 100;
 }
+*/
 
 static esp_err_t tb6612_set_channel(tb6612_channel_t *channel, int16_t speed)
 {
@@ -277,7 +279,7 @@ void app_main(void)
 
     ESP_ERROR_CHECK(wifi_service_init(s_command_queue));
 
-    control_init(s_command_queue, s_telemetry_queue);
+    control_init(s_command_queue, s_motor_queue);
 
     xTaskCreate(control_task, "control", 4096, NULL, 6, NULL);
     xTaskCreate(motor_task, "motor", 4096, NULL, 5, NULL);

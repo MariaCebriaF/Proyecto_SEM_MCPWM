@@ -1,7 +1,7 @@
 #ifndef WIFI_H
 #define WIFI_H
 
-#ifdef --cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
