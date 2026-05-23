@@ -1,0 +1,272 @@
+.main {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    background-color: var(--color-white);
+    isolation: isolate;
+    text-align: center;
+    font-size: var(--fs-40);
+    color: var(--color-gray-100);
+    font-family: var(--font-roboto);
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+/* --- BARRA DE NAVEGACIÓN CORREGIDA CON FLEXBOX --- */
+.header {
+    width: 100%;
+    max-width: 1920px;
+    height: 140px;
+    position: absolute;
+    top: 0px;
+    left: calc(50% - 1920px/2);
+    display: flex;
+    justify-content: center;
+}
+.navBar {
+    margin-top: 25px;
+    border-radius: 50px;
+    background-color: var(--color-gainsboro);
+    width: 1805px;
+    height: 90px;
+    /* Flexbox asegura el centrado vertical perfecto */
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    padding: 0 40px; /* Margen interior a los lados */
+    position: relative;
+}
+
+.leadingIcon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--color-gray-200);
+}
+.trailingElements {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Empuja el círculo a la derecha */
+}
+/* Nuevo círculo dinámico de estado */
+.statusCircle {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    cursor: pointer; /* Para que puedas hacerle clic y probarlo */
+}
+
+.textContent {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%); /* Centrado horizontal absoluto en la barra */
+    display: flex;
+    justify-content: center;
+}
+.headline {
+    font-size: var(--fs-40);
+    font-weight: 500;
+}
+
+/* --- RESTO DE LA INTERFAZ --- */
+.main2 {
+    width: 1920px;
+    height: 768px;
+    position: absolute;
+    top: 141px;
+    left: calc(50% - 1920px/2);
+    font-size: var(--fs-18);
+    color: var(--color-white);
+    font-family: var(--font-inter);
+}
+.fotoRobot1Icon {
+    position: absolute;
+    top: 181px;
+    left: calc(50% - 419px);
+    width: 837px;
+    height: 525px;
+    object-fit: contain;
+}
+
+/* --- EFECTO HOVER EN BOTONES --- */
+.switchButtons {
+    position: absolute;
+    top: 62px;
+    left: calc(50% - 173px);
+    width: 347px;
+    height: 67px;
+    display: flex;
+    gap: 20px;
+    font-size: var(--fs-24);
+}
+.autonomo, .manual {
+    border-radius: var(--br-12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--padding-12) var(--padding-16);
+    box-sizing: border-box;
+    cursor: pointer;
+    /* Transición suave para el escalado */
+    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+/* ¡Aquí ocurre la magia de expansión 1.05x! */
+.autonomo:hover, .manual:hover {
+    transform: scale(1.05);
+}
+
+.autonomo {
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-300);
+    color: var(--color-black);
+}
+.manual {
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-300);
+    color: var(--color-black);
+}
+.activeMode {
+    background-color: var(--color-black) !important;
+    color: var(--color-white) !important;
+    border: 2px solid var(--color-black) !important;
+}
+.autnomo {
+    position: relative;
+    line-height: 145%;
+    font-weight: 500;
+}
+
+/* --- TEXTOS Y CRUCETA (Corregido el espaciado) --- */
+.controlFrame {
+    position: absolute;
+    top: 139px;
+    left: 1407px;
+    width: 439px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.direccionesDeControl {
+    font-size: var(--fs-40);
+    color: var(--color-black);
+    font-weight: 500;
+    margin-bottom: 15px; /* Espacio debajo del título */
+}
+.utilizaLasFlechas {
+    color: var(--color-gray-200);
+    font-weight: 500;
+    width: 350px;
+    margin-bottom: 40px; /* Espacio grande antes de la cruceta */
+}
+.dpadContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.dpadRow {
+    display: flex;
+    gap: 10px;
+}
+.arrowBtn {
+    width: 80px;
+    height: 80px;
+    background-color: var(--color-black);
+    color: var(--color-white);
+    font-size: 36px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    transition: background-color 0.1s ease, box-shadow 0.1s ease;
+}
+.arrowGlow {
+    background-color: var(--color-lime);
+    box-shadow: 0 0 20px var(--color-lime);
+    color: var(--color-black);
+}
+
+/* --- TEXTOS Y BARRA DE PROGRESO (Corregido el espaciado) --- */
+.medidaColision {
+    position: absolute;
+    top: 139px;
+    left: 75px;
+    width: 476px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.distanciaColisin {
+    font-size: var(--fs-40);
+    color: var(--color-black);
+    font-weight: 500;
+    margin-bottom: 15px; /* Espacio debajo del título */
+}
+.distanciaALa {
+    color: var(--color-gray-200);
+    font-weight: 500;
+    width: 380px;
+}
+
+.progressBarTrack {
+    position: absolute;
+    top: 430px;
+    left: 10px;
+    width: 456px;
+    height: 12px;
+    background-color: var(--color-gainsboro);
+    border-radius: 50px;
+    overflow: hidden;
+}
+.progressBarFill {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.distanceNum {
+    position: absolute;
+    top: 177px;
+    left: 116px;
+    width: 303px;
+    height: 197px;
+    font-size: 128px;
+    color: var(--color-black);
+}
+.numGlow {
+    position: absolute;
+    top: 0px;
+    left: 23px;
+    border-radius: 50%;
+    width: 197px;
+    height: 197px;
+    z-index: -1;
+    transition: background-color 0.3s ease;
+}
+.div {
+    position: absolute;
+    top: 1px;
+    left: 0px;
+    line-height: 145%;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 244px;
+    height: 196px;
+}
+.cm {
+    position: absolute;
+    top: 146px;
+    left: 189px;
+    font-size: 36px;
+    font-weight: 500;
+}

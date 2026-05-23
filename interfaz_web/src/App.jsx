@@ -1,122 +1,118 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import styles from './Main.module.css';
+import { useState } from 'react'; 
 
-function App() {
-  const [count, setCount] = useState(0)
+// Ya no importamos Avatar.svg, lo haremos con CSS dinámico
+import imgRobot from './assets/foto-robot 1.png';
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+const App = () => {
+    // ══════════════════════════════════════════════════════════
+    // ESTADOS DE SIMULACIÓN Y CONEXIÓN
+    // ══════════════════════════════════════════════════════════
+    const [distanciaSimulada, setDistanciaSimulada] = useState(45); 
+    const [modo, setModo] = useState(0); 
+    const [lastKeyPressed, setLastKeyPressed] = useState('up'); 
+    
+    // NUEVO: Estado de la conexión (Empieza en rojo/falso)
+    const [isConnected, setIsConnected] = useState(false);
+
+    const MAX_DISTANCIA = 100;
+    const DIST_COLISION = 20;
+
+    // ────────────────────────────────────────────────────────────
+    // CÁLCULOS DINÁMICOS
+    // ────────────────────────────────────────────────────────────
+    const calculateDynamicColor = (dist) => {
+        if (dist <= DIST_COLISION) return "#FF0000";
+        if (dist >= MAX_DISTANCIA) return "#15FF00";
+
+        const ratio = (dist - DIST_COLISION) / (MAX_DISTANCIA - DIST_COLISION);
+        const r = Math.floor(255 - (255 - 21) * ratio);
+        const g = Math.floor(255 * ratio);
+        return `rgb(${r}, ${g}, 0)`;
+    };
+
+    const currentColor = calculateDynamicColor(distanciaSimulada);
+    const progressWidth = Math.min(100, Math.max(0, (distanciaSimulada / MAX_DISTANCIA) * 100));
+
+    return (
+        <div className={styles.main}>
+            <div className={styles.header}>
+                <div className={styles.navBar}>
+                    {/* Botón de Menú (Izquierda) */}
+                    <div className={styles.leadingIcon}>
+                        <div className={styles.hamburgerMenu}>≡</div>
+                    </div>
+                    
+                    {/* Título Centrado (Centro) */}
+                    <div className={styles.textContent}>
+                        <div className={styles.headline}>Robot Control</div>
+                    </div>
+
+                    {/* Círculo de Estado de Conexión (Derecha) */}
+                    <div className={styles.trailingElements}>
+                        <div 
+                            className={styles.statusCircle} 
+                            style={{ backgroundColor: isConnected ? '#00ff51' : '#ff0000' }}
+                            onClick={() => setIsConnected(!isConnected)} // <- TRUCO: Clica el círculo para ver cómo cambia!
+                            title={isConnected ? "Conectado" : "Desconectado"}
+                        />
+                    </div>
+                </div>
+            </div>
+            
+            <div className={styles.main2}>
+                <img className={styles.fotoRobot1Icon} src={imgRobot} alt="Robot PiCar" />
+                
+                <div className={styles.switchButtons}>
+                    <div className={`${styles.autonomo} ${modo === 1 ? styles.activeMode : ''}`} onClick={() => setModo(1)}>
+                        <div className={styles.autnomo}>Autónomo</div>
+                    </div>
+                    <div className={`${styles.manual} ${modo === 0 ? styles.activeMode : ''}`} onClick={() => setModo(0)}>
+                        <div className={styles.autnomo}>Manual</div>
+                    </div>
+                </div>
+                
+                <div className={styles.controlFrame}>
+                    <div className={styles.direccionesDeControl}>Direcciones de Control</div>
+                    <div className={styles.utilizaLasFlechas}>Utiliza las flechas de tu teclado para controlarlo.</div>
+
+                    <div className={styles.dpadContainer}>
+                        <div className={`${styles.arrowBtn} ${lastKeyPressed === 'up' ? styles.arrowGlow : ''}`}>^</div>
+                        <div className={styles.dpadRow}>
+                            <div className={`${styles.arrowBtn} ${lastKeyPressed === 'left' ? styles.arrowGlow : ''}`}>{`<`}</div>
+                            <div className={`${styles.arrowBtn} ${lastKeyPressed === 'down' ? styles.arrowGlow : ''}`}>v</div>
+                            <div className={`${styles.arrowBtn} ${lastKeyPressed === 'right' ? styles.arrowGlow : ''}`}>{`>`}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className={styles.medidaColision}>
+                    <div className={styles.distanciaColisin}>Distancia Colisión</div>
+                    <div className={styles.distanciaALa}>Distancia a la que se encuentra el Robot del próximo obstáculo.</div>
+                    
+                    <div className={styles.progressBarTrack}>
+                        <div 
+                            className={styles.progressBarFill}
+                            style={{ 
+                                width: `${progressWidth}%`,
+                                backgroundColor: currentColor,
+                                boxShadow: `0 0 20px ${currentColor}`
+                            }}
+                        />
+                    </div>
+
+                    <div className={styles.distanceNum}>
+                        <div 
+                            className={styles.numGlow}
+                            style={{ backgroundColor: currentColor, filter: `blur(60px)` }}
+                        />
+                        <div className={styles.div}>{distanciaSimulada}</div>
+                        <div className={styles.cm}>cm</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    );
+};
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
-
-export default App
+export default App;
