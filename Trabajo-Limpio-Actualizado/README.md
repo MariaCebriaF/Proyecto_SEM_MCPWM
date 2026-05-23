@@ -1,9 +1,8 @@
 # Control Adaptativo de Vehiculo con MCPWM
 
-Proyecto SEM basado en dos placas ESP32-S3 y un kit PiCar-X:
+Proyecto SEM basado en una placa ESP32-S3 y un kit PiCar-X:
 
 - `firmware/vehicle`: ESP32-S3 montado en el vehiculo. Controla motores con MCPWM, sirve una interfaz web por WiFi, aplica logica de seguridad y publica telemetria.
-- `firmware/remote`: ESP32-S3 del mando. Lee el joystick y envia comandos al vehiculo por WiFi. Queda como alternativa al control web.
 - `shared/components/sem_protocol`: componente compartido con las estructuras de comandos/telemetria para que ambos proyectos hablen el mismo idioma.
 
 La separacion en dos proyectos ESP-IDF es intencionada: el mando y el vehiculo tienen hardware, tareas y configuracion distinta, aunque compartan el protocolo.
@@ -13,7 +12,6 @@ La separacion en dos proyectos ESP-IDF es intencionada: el mando y el vehiculo t
 ```text
 .
 ├── firmware/
-│   ├── remote/        # Proyecto ESP-IDF de las comunicaciones
 │   └── vehicle/       # Proyecto ESP-IDF del coche PiCar-X
 ├── shared/
 │   └── components/
@@ -71,15 +69,6 @@ idf.py set-target esp32s3
 idf.py build
 idf.py -p /dev/tty.usbmodemXXXX flash monitor
 ```
-
-## Siguientes decisiones tecnicas
-
-1. Calibrar el centro y los limites del servo de direccion.
-2. Probar el sentido real de los motores con las ruedas levantadas.
-3. Validar mediciones reales del HC-SR04 con el divisor de tension en `ECHO`.
-4. Mantener los drivers por capas:
-   - `vehicle`: motores MCPWM, direccion/servo, sensor distancia, comunicacion, web/telemetria.
-   - `remote`: lectura ADC del joystick, botones, comunicacion.
 
 ## Equipo
 
