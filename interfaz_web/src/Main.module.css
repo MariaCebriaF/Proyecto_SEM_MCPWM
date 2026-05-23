@@ -1,3 +1,8 @@
+/* --- VARIABLES GLOBALES --- */
+:root {
+    --color-lime: #15FF00;
+}
+
 .main {
     width: 100%;
     min-height: 100vh;
@@ -12,18 +17,21 @@
     justify-content: center;
     padding: 0;
     margin: 0;
+    /* CORRECCIÓN ADAPTATIVA: Evita scrolls raros en pantallas pequeñas */
+    overflow-x: hidden; 
 }
 
-/* --- BARRA DE NAVEGACIÓN CORREGIDA CON FLEXBOX --- */
+/* --- BARRA DE NAVEGACIÓN --- */
 .header {
     width: 100%;
-    max-width: 1920px;
+    /* No le pongamos max-width, que se estire al 100% */
     height: 140px;
     position: absolute;
     top: 0px;
-    left: calc(50% - 1920px/2);
+    left: 0;
     display: flex;
-    justify-content: center;
+    justify-content: center; /* Centramos el navBar dentro del header full-width */
+    z-index: 10;
 }
 .navBar {
     margin-top: 25px;
@@ -55,13 +63,13 @@
     align-items: center;
     justify-content: flex-end; /* Empuja el círculo a la derecha */
 }
-/* Nuevo círculo dinámico de estado */
+/* Círculo de estado */
 .statusCircle {
     height: 32px;
     width: 32px;
     border-radius: 50%;
     transition: background-color 0.3s ease;
-    cursor: pointer; /* Para que puedas hacerle clic y probarlo */
+    cursor: pointer;
 }
 
 .textContent {
@@ -76,13 +84,22 @@
     font-weight: 500;
 }
 
-/* --- RESTO DE LA INTERFAZ --- */
+/* --- NUEVO: CONTENEDOR DE ESCALADO ADAPTATIVO (¡CORREGIDO!) --- */
+.contentScaleWrapper {
+    width: 1920px;
+    height: 1080px; /* Tamaño original de Figma */
+    position: relative;
+    /* React aplicará transform: scale() aquí dinámicamente */
+    will-change: transform; /* Optimiza el rendimiento */
+}
+
+/* --- INTERFAZ CENTRAL (Relativa al escalador) --- */
 .main2 {
     width: 1920px;
     height: 768px;
     position: absolute;
-    top: 141px;
-    left: calc(50% - 1920px/2);
+    top: 141px; /* Justo debajo del header */
+    left: 0;
     font-size: var(--fs-18);
     color: var(--color-white);
     font-family: var(--font-inter);
@@ -96,7 +113,7 @@
     object-fit: contain;
 }
 
-/* --- EFECTO HOVER EN BOTONES --- */
+/* --- BOTONES --- */
 .switchButtons {
     position: absolute;
     top: 62px;
@@ -115,12 +132,10 @@
     padding: var(--padding-12) var(--padding-16);
     box-sizing: border-box;
     cursor: pointer;
-    /* Transición suave para el escalado */
     transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
-/* ¡Aquí ocurre la magia de expansión 1.05x! */
 .autonomo:hover, .manual:hover {
-    transform: scale(1.05);
+    transform: scale(1.05); /* Efecto Figma */
 }
 
 .autonomo {
@@ -204,6 +219,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
+	z-index: 20; 
 }
 .distanciaColisin {
     font-size: var(--fs-40);
@@ -241,6 +258,8 @@
     font-size: 128px;
     color: var(--color-black);
 }
+
+/* --- ANIMACIÓN DEL GLOW "VIVO" (Requisito 1 - ¡EXAGERADO!) --- */
 .numGlow {
     position: absolute;
     top: 0px;
@@ -250,7 +269,26 @@
     height: 197px;
     z-index: -1;
     transition: background-color 0.3s ease;
+    
+    /* Aplicamos la animación de respiración (breathing) */
+    animation: breathing 3s infinite ease-in-out;
+    will-change: transform, filter, opacity; /* Optimiza rendimiento */
 }
+
+/* Definición de la animación de respiración: más expansión y blur */
+@keyframes breathing {
+    0%, 100% {
+        transform: scale(1);       /* Tamaño original */
+        filter: blur(60px);       /* Desenfoque original */
+        opacity: 0.8;            /* Ligeramente traslúcido */
+    }
+    50% {
+        transform: scale(1.3);     /* ¡Se expande 30%! (antes 1.1) */
+        filter: blur(90px);        /* ¡Desenfoque mayor! (antes 65px) */
+        opacity: 1;               /* Totalmente opaco */
+    }
+}
+
 .div {
     position: absolute;
     top: 1px;
@@ -269,4 +307,13 @@
     left: 189px;
     font-size: 36px;
     font-weight: 500;
+}
+
+.footer {
+    width: 1920px;
+    height: 171px;
+    position: absolute;
+    top: 909px;
+    left: 0;
+    z-index: 2;
 }

@@ -11,6 +11,9 @@
 extern volatile uint8_t g_modo;
 extern portMUX_TYPE spinlock_modo;
 
+extern volatile uint16_t g_distancia_cm; 
+extern portMUX_TYPE spinlock_ultrasonidos; 
+
 static const char *TAG = "SEM_WIFI"; 
 
 // ----------- CREDENCIALES DE RED -----------
@@ -93,9 +96,28 @@ static esp_err_t websocket_handler(httpd_req_t *req)
             xQueueOverwrite(s_wifi_command_queue, &command);
         }
         
+
+        /* 5. Leer la distancia y responder al cliente con un JSON */
+            uint16_t dist;
+            taskENTER_CRITICAL(&spinlock_ultrasonidos);
+            dist = g_distancia_cm;
+            taskEXIT_CRITICAL(&spinlock_ultrasonidos);
+
+            char json_reply[64];
+            snprintf(json_reply, sizeof(json_reply), "{\"distance_cm\": %u}", dist);
+            
+            httpd_ws_frame_t ws_reply = {
+                .payload = (uint8_t*)json_reply,
+                .len = strlen(json_reply),
+                .type = HTTPD_WS_TYPE_TEXT
+            };
+            httpd_ws_send_frame(req, &ws_reply);
+
         // Es obligatorio liberar la memoria reservada para que no haya memory leaks
         free(buf); 
     }
+
+
     
     return ret;
 }
