@@ -1,0 +1,16 @@
+{
+  "idf.flashType": "UART",
+  "idf.portWin": "COM10",
+  "idf.openOcdConfigs": [
+    "board/esp32s3-bridge.cfg"
+  ],
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32s3"
+  },
+  "clangd.path": "C:\\Users\\paula\\.espressif\\tools\\esp-clang\\16.0.1-fe4f10a809\\esp-clang\\bin\\clangd.exe",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=**",
+    "--compile-commands-dir=c:\\Users\\paula\\OneDrive\\Documentos\\UNIVERSIDAD\\GIIROB\\2\\SEM\\Proyecto_SEM_MCPWM\\Trabajo-Limpio-Actualizado\\firmware\\vehicle\\build"
+  ]
+}
