@@ -27,40 +27,46 @@ static QueueHandle_t s_wifi_command_queue = NULL;
 static httpd_handle_t s_server = NULL;
 
 // -------------------- MANEJADOR DE WEBSOCKET ---------------
-static esp_err_t websocket_handler(httpd_req_t *req)
+static esp_err_t websocket_handler(httpd_req_t *p_req)
 {
-    if (req->method == HTTP_GET) {
+    if (HTTP_GET == (p_req->method)) 
+    {
         ESP_LOGI(TAG, "Nueva conexion WebSocket establecida.");
         return ESP_OK;
     }
 
     // Recepción de tramas de datos
     httpd_ws_frame_t ws_pkt;
-    uint8_t *buf = NULL;
+    uint8_t *p_buf = NULL;
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 
     // Cuanto ocupa el mensaje
-    esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 0);
-    if (ret != ESP_OK) return ret;
+    esp_err_t ret = httpd_ws_recv_frame(p_req, &ws_pkt, 0);
+    if (ESP_OK != ret)
+    { 
+        return ret;
+    }
     
     // Si tiene datos, reservamos memoria y leemos el contenido real
-    if (ws_pkt.len > 0) {
-        buf = calloc(1, ws_pkt.len + 1);
-        if (buf == NULL) return ESP_ERR_NO_MEM; 
+    if (ws_pkt.len > 0) 
+    {
+        p_buf = calloc(1, ws_pkt.len + 1);
+        if (NULL == p_buf) return ESP_ERR_NO_MEM; 
         
-        ws_pkt.payload = buf;
-        ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
+        ws_pkt.payload = p_buf;
+        ret = httpd_ws_recv_frame(p_req, &ws_pkt, ws_pkt.len);
         
-        if (ret == ESP_OK) {
-            char *body = (char *)ws_pkt.payload;
+        if (ESP_OK == ret) 
+        {
+            char *p_body = (char *)ws_pkt.payload;
             
             //Extraer los datos enviados por React
             int throttle_in = 0, steering_in = 0, enable_in = 0;
-            unsigned long sequence_in = 0;
+            uint32_t sequence_in = 0;
             int modo_in = 0;
 
-            sscanf(body, "throttle=%d&steering=%d&enable=%d&sequence=%lu&modo=%d",
+            sscanf(p_body, "throttle=%d&steering=%d&enable=%d&sequence=%lu&modo=%d",
                    &throttle_in, &steering_in, &enable_in, &sequence_in, &modo_in);
 
             // Actualizar la variable global del Modo de forma segura
@@ -78,7 +84,8 @@ static esp_err_t websocket_handler(httpd_req_t *req)
             };
             
             // Mandar el comando a la Control Task sin bloquear
-            if (s_wifi_command_queue != NULL) {
+            if (s_wifi_command_queue != NULL) 
+            {
                 xQueueOverwrite(s_wifi_command_queue, &command);
             }
         }
@@ -97,10 +104,10 @@ static esp_err_t websocket_handler(httpd_req_t *req)
             .len = strlen(json_reply),
             .type = HTTPD_WS_TYPE_TEXT
         };
-        httpd_ws_send_frame(req, &ws_reply);
+        httpd_ws_send_frame(p_req, &ws_reply);
 
         // Liberar la memoria RAM para evitar memory leaks
-        free(buf); 
+        free(p_buf); 
     }
     return ret;
 }
@@ -114,7 +121,8 @@ static esp_err_t start_web_server(void)
 
     ESP_LOGI(TAG, "Iniciando servidor en puerto %d", config.server_port);
     esp_err_t ret = httpd_start(&s_server, &config);
-    if (ret == ESP_OK) {
+    if (ret == ESP_OK) 
+    {
         httpd_uri_t ws_uri = {
             .uri        = "/ws",
             .method     = HTTP_GET,
@@ -130,12 +138,14 @@ static esp_err_t start_web_server(void)
 
 
 // ----------------------- INICIALIZACION MODO AP (ROUTER) -----------------------
-esp_err_t wifi_service_init(QueueHandle_t command_queue) {
+esp_err_t wifi_service_init(QueueHandle_t command_queue) 
+{
     s_wifi_command_queue = command_queue;
 
     // Iniciar memoria NVS
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) 
+    {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
@@ -161,7 +171,8 @@ esp_err_t wifi_service_init(QueueHandle_t command_queue) {
     };
     
     // Si la clave esta vacia, abrimos la red
-    if (strlen(WIFI_PASS) == 0) {
+    if (strlen(WIFI_PASS) == 0) 
+    {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
     
