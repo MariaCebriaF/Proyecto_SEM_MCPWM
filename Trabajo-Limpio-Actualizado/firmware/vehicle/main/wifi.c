@@ -17,31 +17,30 @@ extern portMUX_TYPE spinlock_ultrasonidos;
 
 static const char *TAG = "SEM_WIFI"; 
 
-// ----------- CREDENCIALES DE LA RED QUE VA A CREAR EL COCHE -----------
+// ----------- CREDENCIALES DE LA RED QUE VA A CREAR LA ESP32-S3-----------
 #define WIFI_SSID "SEM-PICAR"
-#define WIFI_PASS "12345678" // ¡Ojo! Pon una de al menos 8 caracteres
+#define WIFI_PASS "12345678" 
 // ----------------------------------------------------------------------
 
 // Variables estáticas para guardar la cola y el servidor
 static QueueHandle_t s_wifi_command_queue = NULL; 
 static httpd_handle_t s_server = NULL;
 
-// ==================== MANEJADOR DE WEBSOCKET ====================
+// -------------------- MANEJADOR DE WEBSOCKET ---------------
 static esp_err_t websocket_handler(httpd_req_t *req)
 {
-    // 1. Handshake inicial del WebSocket
     if (req->method == HTTP_GET) {
         ESP_LOGI(TAG, "Nueva conexion WebSocket establecida.");
         return ESP_OK;
     }
 
-    // 2. Recepción de tramas (frames) de datos
+    // Recepción de tramas de datos
     httpd_ws_frame_t ws_pkt;
     uint8_t *buf = NULL;
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 
-    // Leemos primero para saber cuánto ocupa el mensaje
+    // Cuanto ocupa el mensaje
     esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 0);
     if (ret != ESP_OK) return ret;
     
@@ -56,7 +55,7 @@ static esp_err_t websocket_handler(httpd_req_t *req)
         if (ret == ESP_OK) {
             char *body = (char *)ws_pkt.payload;
             
-            /* 1. Extraer los datos enviados por React usando sscanf */
+            //Extraer los datos enviados por React
             int throttle_in = 0, steering_in = 0, enable_in = 0;
             unsigned long sequence_in = 0;
             int modo_in = 0;
@@ -64,12 +63,12 @@ static esp_err_t websocket_handler(httpd_req_t *req)
             sscanf(body, "throttle=%d&steering=%d&enable=%d&sequence=%lu&modo=%d",
                    &throttle_in, &steering_in, &enable_in, &sequence_in, &modo_in);
 
-            /* 2. Actualizar la variable global del Modo de forma segura */
+            // Actualizar la variable global del Modo de forma segura
             taskENTER_CRITICAL(&spinlock_modo);
             g_modo = (uint8_t)modo_in;
             taskEXIT_CRITICAL(&spinlock_modo);
             
-            /* 3. Empaquetar los comandos de movimiento para la control_task */
+            // Empaquetar los comandos de movimiento para la control_task
             sem_control_command_t command = {
                 .version = SEM_PROTOCOL_VERSION,
                 .throttle = sem_protocol_clamp_axis(throttle_in),
@@ -78,13 +77,13 @@ static esp_err_t websocket_handler(httpd_req_t *req)
                 .sequence = (uint32_t)sequence_in,
             };
             
-            /* 4. Mandamos el comando a la Control Task sin bloquear */
+            // Mandar el comando a la Control Task sin bloquear
             if (s_wifi_command_queue != NULL) {
                 xQueueOverwrite(s_wifi_command_queue, &command);
             }
         }
         
-        /* 5. Leer la distancia y responder a React con un JSON */
+        // Leer la distancia y responder a React con un JSON
         uint16_t dist;
         taskENTER_CRITICAL(&spinlock_ultrasonidos);
         dist = g_distancia_cm;
@@ -107,7 +106,7 @@ static esp_err_t websocket_handler(httpd_req_t *req)
 }
 
 
-// ==================== SERVIDOR HTTP ====================
+// ------------------ SERVIDOR HTTP --------------------
 static esp_err_t start_web_server(void)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -130,11 +129,11 @@ static esp_err_t start_web_server(void)
 }
 
 
-// ==================== INICIALIZACION MODO AP (ROUTER) ====================
+// ----------------------- INICIALIZACION MODO AP (ROUTER) -----------------------
 esp_err_t wifi_service_init(QueueHandle_t command_queue) {
     s_wifi_command_queue = command_queue;
 
-    // 1. Iniciar memoria NVS
+    // Iniciar memoria NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -142,7 +141,7 @@ esp_err_t wifi_service_init(QueueHandle_t command_queue) {
     }
     ESP_ERROR_CHECK(ret);
 
-    // 2. Configurar la red en Modo Access Point
+    // Configurar la red en Modo Access Point
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_ap();
@@ -175,6 +174,6 @@ esp_err_t wifi_service_init(QueueHandle_t command_queue) {
     ESP_LOGI(TAG, "PASS: %s", WIFI_PASS);
     ESP_LOGI(TAG, "Conectate con el ordenador y abre React (La IP del robot es 192.168.4.1)");
 
-    // 3. Encender el servidor
+    // Encender el servidor
     return start_web_server();
 }
