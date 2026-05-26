@@ -1,9 +1,10 @@
 /**
  * @file hcsr04-driver.c
- * @author Aad van Gerwen
+ * @author_original Aad van Gerwen Todos los creditos a él, mil gracias
+ * @author_adatado Maria Cebriá
  * @brief hcsr04 driver
- * @version 0.1
- * @date 2025-03-18
+ * @version 0.2
+ * @date 2025-05-23
  **/
 
 #include "freertos/FreeRTOS.h"
@@ -30,7 +31,8 @@ static esp_err_t ultrasonic_measure_raw(uint32_t max_time_us, uint32_t *time_us)
     int64_t echo_start;
     int64_t time = 0;
 
-    if (time_us == NULL) {
+    if (time_us == NULL) 
+    {
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -44,23 +46,28 @@ static esp_err_t ultrasonic_measure_raw(uint32_t max_time_us, uint32_t *time_us)
     gpio_set_level(ESP_HCSR04_TRIGGER_PIN, 0);
     portEXIT_CRITICAL(&mux);
 
-    if (gpio_get_level(ESP_HCSR04_ECHO_PIN)) {
+    if (gpio_get_level(ESP_HCSR04_ECHO_PIN)) 
+    {
         return_value = ESP_ERR_ULTRASONIC_PING;
     }
 
     echo_start = esp_timer_get_time();
-    while (!gpio_get_level(ESP_HCSR04_ECHO_PIN) && return_value == ESP_OK) {
+    while (!gpio_get_level(ESP_HCSR04_ECHO_PIN) && return_value == ESP_OK) 
+    {
         time = esp_timer_get_time();
-        if (time - echo_start >= PING_TIMEOUT) {
+        if (time - echo_start >= PING_TIMEOUT) 
+        {
             return_value = ESP_ERR_ULTRASONIC_PING_TIMEOUT;
         }
     }
 
     echo_start = esp_timer_get_time();
     time = echo_start;
-    while (gpio_get_level(ESP_HCSR04_ECHO_PIN) && return_value == ESP_OK) {
+    while (gpio_get_level(ESP_HCSR04_ECHO_PIN) && return_value == ESP_OK)
+        {
         time = esp_timer_get_time();
-        if (time - echo_start >= max_time_us) {
+        if (time - echo_start >= max_time_us) 
+        {
             return_value = ESP_ERR_ULTRASONIC_ECHO_TIMEOUT;
         }
     }
@@ -86,7 +93,8 @@ esp_err_t UltrasonicMeasure(uint32_t max_distance, uint32_t *distance)
     uint32_t time_us;
     esp_err_t return_value = ESP_OK;
 
-    if (distance == NULL) {
+    if (distance == NULL)
+    {
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -97,7 +105,8 @@ esp_err_t UltrasonicMeasure(uint32_t max_distance, uint32_t *distance)
 
 void UltrasonicAssert(esp_err_t error_code)
 {
-    if (error_code != ESP_OK) {
+    if (error_code != ESP_OK) 
+    {
         ESP_LOGI(log_tag, "Measurement error: %x\n", error_code);
     }
 }
