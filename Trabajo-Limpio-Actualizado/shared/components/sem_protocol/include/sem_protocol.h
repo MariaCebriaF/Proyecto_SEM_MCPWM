@@ -9,7 +9,8 @@ extern "C" {
 
 #define SEM_PROTOCOL_VERSION 1
 
-typedef enum {
+typedef enum 
+{
     SEM_VEHICLE_STATE_STOPPED = 0,
     SEM_VEHICLE_STATE_RUNNING,
     SEM_VEHICLE_STATE_OBSTACLE_SLOWDOWN,
@@ -17,7 +18,8 @@ typedef enum {
     SEM_VEHICLE_STATE_LINK_LOST,
 } sem_vehicle_state_t;
 
-typedef struct {
+typedef struct 
+{
     uint8_t version;
     int16_t throttle;  // -1000..1000
     int16_t steering;  // -1000..1000
@@ -25,7 +27,8 @@ typedef struct {
     uint32_t sequence;
 } sem_control_command_t;
 
-typedef struct {
+typedef struct 
+{
     uint8_t version;
     int16_t applied_throttle;  // -1000..1000
     int16_t applied_steering;  // -1000..1000
