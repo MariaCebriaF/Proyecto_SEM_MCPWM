@@ -6,7 +6,7 @@ Revisa esta tabla antes de conectar motores. La foto del cableado no deja leer t
 
 | Funcion | GPIO | Notas |
 | --- | --- | --- |
-| TB6612 STBY | GPIO17 | Cambiar `TB6612_STBY_GPIO` si el cableado real usa otro pin |
+| TB6612 STBY | GPIO17 | STBY |
 | TB6612 PWMA | GPIO4 | MCPWM, motor A |
 | TB6612 AIN1 | GPIO5 | GPIO direccion motor A |
 | TB6612 AIN2 | GPIO6 | GPIO direccion motor A |
