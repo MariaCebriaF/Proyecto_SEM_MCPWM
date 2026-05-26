@@ -1,9 +1,10 @@
 /**
- * @file hcsr04-driver.h
- * @author Aad van Gerwen
- * @brief ESP IDF hcsr04 driver
- * @version 0.1
- * @date 2025-03-18
+ * @file hcsr04-driver.c
+ * @author_original Aad van Gerwen Todos los creditos a él, mil gracias
+ * @author_adatado Maria Cebriá
+ * @brief hcsr04 driver
+ * @version 0.2
+ * @date 2025-05-23
  **/
 
 #pragma once
