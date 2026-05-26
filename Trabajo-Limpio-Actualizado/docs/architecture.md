@@ -47,7 +47,7 @@ El componente `sem_protocol` define:
 
 La idea es que cualquier cambio en el formato de mensajes se haga una sola vez en `shared/components/sem_protocol`.
 
-## Recomendacion de comunicacion
+## Comunicación
 
 Para el control desde ordenador, el vehiculo arranca como punto de acceso WiFi y escucha comandos en `ws://192.168.4.1/ws`.
 La web envia comandos periodicos por WebSocket mientras hay teclas pulsadas. El vehiculo para si no recibe comandos durante un timeout corto, actualmente 500 ms.
